@@ -47,7 +47,6 @@ int s_open() {
     else{
         return s;
     }
-    return s;
 }
 
 void s_close(int s) {
@@ -57,4 +56,19 @@ void s_close(int s) {
 int set_non_block_mode(int s){
     int fl = fcntl(s, F_GETFL, 0);
     return fcntl(s, F_SETFL, fl | O_NONBLOCK);
+}
+
+/**
+ * infinite handle new clients
+ */
+void work() {
+    clients clients;
+    init_client_list(&clients);
+    fd_set rfd;
+    fd_set wfd;
+    int nfds = listening_socket;
+    struct timeval tv = {1, 0};
+
+    int time_to_exit = 0;
+
 }
