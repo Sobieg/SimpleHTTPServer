@@ -12,4 +12,10 @@ typedef struct cli {
     int cs;
 } client;
 
+typedef struct clients_list {
+    client client;
+    struct clients_list* next;
+    struct clients_list* prev;
+} clients;
+
 #endif //HTTPSERV_CLIENT_H
