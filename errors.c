@@ -8,6 +8,6 @@
 
 int sock_err(const char* function, int s) {
     int err = errno;
-    printf("%s: socket error: %s", function, err);
+    printf("%s: socket error: %s\n", function, err);
     return s;
 }
