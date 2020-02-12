@@ -15,7 +15,7 @@ typedef struct cli {
 } client;
 
 typedef struct clients_list {
-    client client;
+    client* client;
     struct clients_list* next;
     struct clients_list* prev;
 
@@ -34,7 +34,7 @@ clients* init_client_list(clients* cls);
  * @param cli client to add
  * @return pointer to client
  */
-clients* add_new_client(clients* cls, client cli);
+clients* add_new_client(clients* cls, client* cli);
 
 /**
  * Remove client from list

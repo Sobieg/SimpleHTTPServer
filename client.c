@@ -8,10 +8,11 @@
 clients* init_client_list(clients* cls) {
     cls->next = 0;
     cls->prev = 0;
-    memset(&(cls->client), 0, sizeof(client));
+    memset(cls->client, 0, sizeof(client));
+    cls->client = 0;
 }
 
-clients* add_new_client(clients* cls, client cli) {
+clients* add_new_client(clients* cls, client* cli) {
     clients* old_next = cls->next;
     clients* new_cli = calloc(1, sizeof(clients));
     new_cli->client = cli;
@@ -29,7 +30,10 @@ clients* remove_client(clients* cli) {
     }
     else {
         cli->prev = next_cli;
+        free(cli->client);
         free(cli);
+        cli->client = 0;
+        cli = 0;
     }
     return next_cli;
 }
