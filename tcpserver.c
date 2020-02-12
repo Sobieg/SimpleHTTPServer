@@ -8,8 +8,8 @@
 
 
 
-int listening_port = 8080;
-int listening_socket = 0;
+//int listening_port = 8080;
+//int listening_socket = 0;
 
 /*
  * init server, return
@@ -47,7 +47,6 @@ int s_open() {
     else{
         return s;
     }
-    return s;
 }
 
 void s_close(int s) {
