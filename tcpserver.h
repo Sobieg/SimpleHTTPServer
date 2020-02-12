@@ -16,8 +16,6 @@
 #ifndef HTTPSERV_TCPSERVER_H
 #define HTTPSERV_TCPSERVER_H
 
-int listening_port = 8080;
-int listening_socket = 0;
 
 int init_server(int port);
 int s_open();
