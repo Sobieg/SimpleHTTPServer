@@ -8,10 +8,18 @@
 #include <netdb.h>
 #include <stdlib.h>
 #include <string.h>
+#include "mhash.h"
+
+#define BUFFER_SIZE 1024
+#define SHA512_SIZE 64
+#define GOST_SIZE 32
 
 typedef struct cli {
     struct sockaddr_in addr;
     int cs;
+    unsigned char buff[BUFFER_SIZE];
+    unsigned char sha512_hash[SHA512_SIZE];
+    unsigned char gost_hash[GOST_SIZE];
 } client;
 
 typedef struct clients_list {
