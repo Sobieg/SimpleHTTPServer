@@ -24,5 +24,6 @@ int s_open();
 void s_close(int s);
 int set_non_block_mode(int s);
 int work();
+//void serve(int cs)
 
 #endif //HTTPSERV_TCPSERVER_H
