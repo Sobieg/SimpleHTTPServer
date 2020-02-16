@@ -24,6 +24,7 @@ typedef struct cli {
     unsigned char gost_hash[GOST_SIZE];
     unsigned char shabuff[SHA512_SIZE*2+1];
     unsigned char gostbuff[GOST_SIZE*2+1];
+    int is_error;
 } client;
 
 typedef struct clients_list {

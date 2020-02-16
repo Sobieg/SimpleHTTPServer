@@ -166,26 +166,36 @@ int work() {
                         char* startjson = strstr(buff, "{");
                         if (startjson != 0) {
                             json_value* val = json_parse(startjson, rcv);
-                            memcpy(cur_cli->client->data, val->u.object.values->value->u.string.ptr, strlen(val->u.object.values->value->u.string.ptr));
-                            MHASH sha512;
-                            MHASH gost;
-                            unsigned char* hash_sha512;
-                            unsigned char* hash_gost;
+                            if (!val) {
+                                cur_cli->client->is_error = 1;
+                            }
+                            else {
+                                memcpy(cur_cli->client->data, val->u.object.values->value->u.string.ptr,
+                                       strlen(val->u.object.values->value->u.string.ptr));
+                                MHASH sha512;
+                                MHASH gost;
+                                unsigned char *hash_sha512;
+                                unsigned char *hash_gost;
 
-                            sha512 = mhash_init(MHASH_SHA512);
-                            if (sha512 == MHASH_FAILED) {exit(1);}
-                            mhash(sha512, cur_cli->client->data, strlen(cur_cli->client->data));
-                            hash_sha512 = mhash_end(sha512);
-                            gost = mhash_init(MHASH_GOST);
-                            if (gost == MHASH_FAILED) exit(1);
-                            mhash(gost, cur_cli->client->data, strlen(cur_cli->client->data));
-                            hash_gost = mhash_end(gost);
-                            memcpy(cur_cli->client->sha512_hash, hash_sha512, SHA512_SIZE);
-                            memcpy(cur_cli->client->gost_hash, hash_gost, GOST_SIZE);
+                                sha512 = mhash_init(MHASH_SHA512);
+                                if (sha512 == MHASH_FAILED) { exit(1); }
+                                mhash(sha512, cur_cli->client->data, strlen(cur_cli->client->data));
+                                hash_sha512 = mhash_end(sha512);
+                                gost = mhash_init(MHASH_GOST);
+                                if (gost == MHASH_FAILED) exit(1);
+                                mhash(gost, cur_cli->client->data, strlen(cur_cli->client->data));
+                                hash_gost = mhash_end(gost);
+                                memcpy(cur_cli->client->sha512_hash, hash_sha512, SHA512_SIZE);
+                                memcpy(cur_cli->client->gost_hash, hash_gost, GOST_SIZE);
+                                cur_cli->client->is_error = 0;
+                            }
                         }
                         else {
-                            //there is no json
+                            cur_cli->client->is_error = 1;
                         }
+                    }
+                    else {
+                        cur_cli->client->is_error = 1;
                     }
                     //If data goes in multiople pieces
 //                    while(buff[rcv] != '}') {
@@ -195,40 +205,30 @@ int work() {
 //                        }
 //                        rcv += (int) recv(cur_cli->client->cs, buff+rcv, RCV_BUFFER_SIZE-rcv, 0);
 //                    }
-//                        printf("%s\n\n", buff);
-//                    json_value* val = json_parse(buff, rcv);
-//                    memcpy(cur_cli->client->data, val->u.object.values->value->u.string.ptr, strlen(val->u.object.values->value->u.string.ptr));
-//                    MHASH sha512;
-//                    MHASH gost;
-//                    unsigned char* hash_sha512;
-//                    unsigned char* hash_gost;
-//
-//                    sha512 = mhash_init(MHASH_SHA512);
-//                    if (sha512 == MHASH_FAILED) {exit(1);}
-//                    mhash(sha512, cur_cli->client->data, strlen(cur_cli->client->data));
-//                    hash_sha512 = mhash_end(sha512);
-//                    gost = mhash_init(MHASH_GOST);
-//                    if (gost == MHASH_FAILED) exit(1);
-//                    mhash(gost, cur_cli->client->data, strlen(cur_cli->client->data));
-//                    hash_gost = mhash_end(gost);
-//                    memcpy(cur_cli->client->sha512_hash, hash_sha512, SHA512_SIZE);
-//                    memcpy(cur_cli->client->gost_hash, hash_gost, GOST_SIZE);
                 }
                 if (FD_ISSET(cur_cli->client->cs, &wfd)) {
                     int sent = 0;
                     int flags = MSG_NOSIGNAL;
                     int ret = 0;
 //                    char sndbuff[RCV_BUFFER_SIZE] = {0};
-                    memset(cur_cli->client->buff, 0, RCV_BUFFER_SIZE);
-                    for (int i = 0; i<SHA512_SIZE; i++) {
-                        sprintf((cur_cli->client->shabuff)+i*2, "%.2x", (cur_cli->client->sha512_hash)[i]);
+                    if (cur_cli->client->is_error) {
+                        sprintf(cur_cli->client->buff, "HTTP/1.0 404 Not Found\r\n\r\n <h1>404 Not Found </h1>");
                     }
-                    for (int i = 0; i<GOST_SIZE; i++) {
-                        sprintf((cur_cli->client->gostbuff)+i*2, "%.2x", (cur_cli->client->gost_hash)[i]);
+                    else {
+                        memset(cur_cli->client->buff, 0, RCV_BUFFER_SIZE);
+                        for (int i = 0; i < SHA512_SIZE; i++) {
+                            sprintf((cur_cli->client->shabuff) + i * 2, "%.2x", (cur_cli->client->sha512_hash)[i]);
+                        }
+                        for (int i = 0; i < GOST_SIZE; i++) {
+                            sprintf((cur_cli->client->gostbuff) + i * 2, "%.2x", (cur_cli->client->gost_hash)[i]);
+                        }
+                        sprintf(cur_cli->client->buff,
+                                "HTTP/1.0 200 OK\r\n\r\n{\r\n\"sha512\": \"%s\",\r\n\"gost\": \"%s\"\r\n}\r\n",
+                                cur_cli->client->shabuff, cur_cli->client->gostbuff);
                     }
-                    sprintf(cur_cli->client->buff, "HTTP/1.0 200 OK\r\n\r\n{\r\n\"data\": \"%s\",\r\n\"gost\": \"%s\"\r\n}\r\n", cur_cli->client->shabuff, cur_cli->client->gostbuff);
                     while (sent < strlen(cur_cli->client->buff)) {
-                        ret = send(cur_cli->client->cs, cur_cli->client->buff+sent, strlen(cur_cli->client->buff)-sent, flags);
+                        ret = send(cur_cli->client->cs, cur_cli->client->buff + sent,
+                                   strlen(cur_cli->client->buff) - sent, flags);
                         if (ret <= 0) {
                             return sock_err("send", cur_cli->client->cs);
                         }
