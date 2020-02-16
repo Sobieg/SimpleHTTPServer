@@ -4,6 +4,7 @@
 */
 #include "client.h"
 #include "errors.h"
+#include "json.h"
 #include <sys/types.h>
 //#include <sys/socket.h>
 //#include <netdb.h>
@@ -17,10 +18,12 @@
 #define HTTPSERV_TCPSERVER_H
 
 
+
 int init_server(int port);
 int s_open();
 void s_close(int s);
 int set_non_block_mode(int s);
-void work();
+int work();
+//void serve(int cs)
 
 #endif //HTTPSERV_TCPSERVER_H

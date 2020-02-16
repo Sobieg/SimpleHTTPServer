@@ -25,15 +25,16 @@ clients* add_new_client(clients* cls, client* cli) {
 clients* remove_client(clients* cli) {
     clients* next_cli = cli->next;
     if (cli->prev == 0) {
-        memset(&(cli->client), 0, sizeof(client));
-        cli->next = 0;
+//        free((cli->client));
+        cli->client = 0;
+        free(cli);
     }
     else {
-        cli->prev = next_cli;
-        free(cli->client);
+        cli->prev->next = next_cli;
+//        free(cli->client);
         free(cli);
         cli->client = 0;
-        cli = 0;
     }
+    cli = 0;
     return next_cli;
 }
