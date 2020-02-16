@@ -29,8 +29,8 @@ clients* remove_client(clients* cli) {
         cli->next = 0;
     }
     else {
-        cli->prev = next_cli;
-        free(cli->client);
+        cli->prev->next = next_cli;
+//        free(cli->client);
         free(cli);
         cli->client = 0;
         cli = 0;
